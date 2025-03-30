@@ -84,16 +84,16 @@ def call_model(state: MessagesState, config: RunnableConfig) -> dict[str, BaseMe
     response = llm.invoke(messages_with_system, config)
     return {"messages": response}
 
-
-# 4. Create the workflow graph
+# model
 workflow = StateGraph(MessagesState)
 workflow.add_node("agent", call_model)
 workflow.add_node("dev_crew", ToolNode(tools))
 workflow.set_entry_point("agent")
 
-# Add conditional edges
-workflow.add_conditional_edges("dev_crew", should_continue)
+# connects conditionally agent -> dev crew OR ENDS
+workflow.add_conditional_edges("agent", should_continue)
+
+# dev crew obliged to return response to agent so that it can return to the user
 workflow.add_edge("dev_crew", "agent")
 
-# 6. Compile the workflow
 agent = workflow.compile()
