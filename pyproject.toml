@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "code-assistant"
+version = "0.1.0"
+description = ""
+authors = ["ioannis.basmatzidis <ioannis.basmatzidis@revolut.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+streamlit = "^1.44.0"
+crewai = "^0.108.0"
+langchain = ">=0.1.0"
+langchain-google-vertexai = ">=1.0.0"
+langgraph = "^0.3.21"
+pylint = "^3.3.6"
+black = "^25.1.0"
+ruff = "^0.11.2"
+lint = "^1.2.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

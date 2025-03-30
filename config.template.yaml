@@ -1,0 +1,8 @@
+# Template configuration file
+# Copy this file to config.yaml and fill in your values
+
+# API Keys and Secrets
+google_vertex_ai:
+  project: "your-project"
+  location: "us-central1"  # Default location for Vertex AI
+  model: "chat-bison"      # Default model
