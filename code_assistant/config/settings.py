@@ -2,7 +2,6 @@
 
 import os
 from pathlib import Path
-from typing import Optional
 
 import yaml
 from pydantic import BaseModel, Field
@@ -19,10 +18,12 @@ class GoogleVertexAIConfig(BaseModel):
 class Settings(BaseModel):
     """Main settings class for the application."""
 
-    google_vertex_ai: GoogleVertexAIConfig = Field(..., description="Google Vertex AI configuration")
+    google_vertex_ai: GoogleVertexAIConfig = Field(
+        ..., description="Google Vertex AI configuration"
+    )
 
     @classmethod
-    def load(cls, config_path: Optional[str] = None) -> "Settings":
+    def load(cls, config_path: str | None = None) -> "Settings":
         """Load settings from configuration file.
 
         Args:
@@ -35,6 +36,7 @@ class Settings(BaseModel):
         Raises:
             FileNotFoundError: If configuration file is not found.
             ValueError: If configuration file is invalid.
+
         """
         if config_path is None:
             project_root = Path(__file__).parent.parent.parent
@@ -46,17 +48,17 @@ class Settings(BaseModel):
                 "Please copy config.template.yaml to config.yaml and fill in your values."
             )
 
-        with open(config_path, "r") as f:
+        with open(config_path) as f:
             config_data = yaml.safe_load(f)
 
         return cls(**config_data)
 
 
 # Global settings instance
-settings: Optional[Settings] = None
+settings: Settings | None = None
 
 
-def get_settings(config_path: Optional[str] = None) -> Settings:
+def get_settings(config_path: str | None = None) -> Settings:
     """Get the global settings instance.
 
     Args:
@@ -64,6 +66,7 @@ def get_settings(config_path: Optional[str] = None) -> Settings:
 
     Returns:
         Settings: Global settings instance.
+
     """
     global settings
     if settings is None:

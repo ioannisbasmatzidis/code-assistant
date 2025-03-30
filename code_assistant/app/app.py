@@ -2,11 +2,10 @@
 
 import contextlib
 import datetime
-import json
 from io import StringIO
-from pathlib import Path
 
 import streamlit as st
+
 from code_assistant.app.agent import agent
 from code_assistant.config import get_settings
 
@@ -18,7 +17,7 @@ st.set_page_config(
     page_title="Code Assistant",
     page_icon="💻",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 # Initialize session state variables
@@ -80,7 +79,7 @@ with chat_col:
         st.markdown("</div>", unsafe_allow_html=True)
 
     if prompt:
-        timestamp = datetime.datetime.now(tz=datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.datetime.now(tz=datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
         interaction = {
             "timestamp": timestamp,
             "user_message": {"role": "user", "content": prompt},

@@ -15,6 +15,8 @@
 # limitations under the License.
 
 # mypy: disable-error-code="union-attr"
+import logging
+
 from langchain_core.messages import BaseMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
@@ -22,8 +24,12 @@ from langchain_google_vertexai import ChatVertexAI
 from langgraph.graph import END, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
 
-from .crew.crew import DevCrew
 from code_assistant.config import get_settings
+
+from .crew.crew import DevCrew
+
+# Configure logging to suppress Streamlit warnings
+logging.getLogger("streamlit").setLevel(logging.ERROR)
 
 settings = get_settings()
 
@@ -57,7 +63,6 @@ def should_continue(state: MessagesState) -> str:
 
 def call_model(state: MessagesState, config: RunnableConfig) -> dict[str, BaseMessage]:
     """Process the input and generate a response using the language model."""
-
     system_message = (
         "You are an expert Lead Software Engineer Manager.\n"
         "Your role is to speak to a user and understand what kind of code they need to "

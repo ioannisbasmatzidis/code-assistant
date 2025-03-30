@@ -2,7 +2,7 @@ PROJECT_NAME=code_assistant
 
 .DEFAULT: help
 
-.PHONY: fmt style verify test run
+.PHONY: fmt style verify test run test-cov clean
 help:
 	@echo ""
 	@echo "$(BOLD)$(PROJECT_NAME)$(RESET)"
@@ -17,6 +17,12 @@ style:  ## Run linting checks
 	poetry run ./scripts/lint.sh --p SERVICE -t --name code_assistant
 
 verify: style test  ## Run all checks and tests
+
+test:  ## Run tests
+	poetry run pytest
+
+test-cov:  ## Run tests with coverage
+	poetry run pytest --cov=code_assistant --cov-report=term-missing
 
 run:  ## Run the Streamlit app
 	poetry run streamlit run code_assistant/app/app.py 
