@@ -1,10 +1,6 @@
 """Tests for the Code Assistant application."""
 
-import os
-from pathlib import Path
-
 import pytest
-import streamlit as st
 
 from code_assistant.config import Settings, get_settings
 

@@ -4,6 +4,7 @@ import contextlib
 import datetime
 from io import StringIO
 import json
+from typing import Any
 
 import streamlit as st
 
@@ -12,6 +13,23 @@ from code_assistant.config import get_settings
 
 # Load settings
 settings = get_settings()
+
+
+def safe_json_serialize(obj: Any) -> str:
+    """Safely serialize an object to JSON, handling complex objects that can't be serialized."""
+    try:
+        return json.dumps(obj, indent=2, default=str)
+    except (TypeError, ValueError) as e:
+        # If direct serialization fails, try to extract serializable parts
+        try:
+            if hasattr(obj, '__dict__'):
+                simplified = {k: str(v) if not isinstance(v, (str, int, float, bool, list, dict, type(None))) else v 
+                            for k, v in obj.__dict__.items()}
+                return json.dumps(simplified, indent=2, default=str)
+            else:
+                return json.dumps({"error": f"Unable to serialize object: {str(e)}", "type": str(type(obj)), "value": str(obj)}, indent=2)
+        except Exception as fallback_error:
+            return json.dumps({"error": f"Serialization failed: {str(fallback_error)}", "original_error": str(e), "type": str(type(obj))}, indent=2)
 
 # Configure page
 st.set_page_config(
@@ -156,37 +174,53 @@ with debug_col:
     with debug_tab:
         st.title("🔍 Debug Panel")
 
-        # Display interactions grouped by timestamp
-        st.subheader("Interactions")
-        if hasattr(st.session_state, "interactions") and st.session_state.interactions:
-            for idx, interaction in enumerate(st.session_state.interactions):
-                with st.expander(
-                    f"Interaction {idx + 1} - {interaction['timestamp']}",
-                    expanded=False,
-                ):
-                    tab1, tab2, tab3 = st.tabs(
-                        ["User Message", "Assistant Response", "Agent Input"],
-                    )
+        try:
+            # Display interactions grouped by timestamp
+            st.subheader("Interactions")
+            if hasattr(st.session_state, "interactions") and st.session_state.interactions:
+                for idx, interaction in enumerate(st.session_state.interactions):
+                    try:
+                        with st.expander(
+                            f"Interaction {idx + 1} - {interaction.get('timestamp', 'Unknown time')}",
+                            expanded=False,
+                        ):
+                            tab1, tab2, tab3 = st.tabs(
+                                ["User Message", "Assistant Response", "Agent Input"],
+                            )
 
-                    with tab1:
-                        st.code(
-                            json.dumps(interaction["user_message"], indent=2),
-                            language="json",
-                        )
+                            with tab1:
+                                try:
+                                    st.code(
+                                        safe_json_serialize(interaction.get("user_message", {})),
+                                        language="json",
+                                    )
+                                except Exception as e:
+                                    st.error(f"Error displaying user message: {str(e)}")
 
-                    with tab2:
-                        st.code(
-                            json.dumps(interaction["assistant_message"], indent=2),
-                            language="json",
-                        )
+                            with tab2:
+                                try:
+                                    st.code(
+                                        safe_json_serialize(interaction.get("assistant_message", {})),
+                                        language="json",
+                                    )
+                                except Exception as e:
+                                    st.error(f"Error displaying assistant message: {str(e)}")
 
-                    with tab3:
-                        st.code(
-                            json.dumps(interaction["agent_input"], indent=2),
-                            language="json",
-                        )
-        else:
-            st.info("No interactions yet")
+                            with tab3:
+                                try:
+                                    st.code(
+                                        safe_json_serialize(interaction.get("agent_input", {})),
+                                        language="json",
+                                    )
+                                except Exception as e:
+                                    st.error(f"Error displaying agent input: {str(e)}")
+                    except Exception as e:
+                        st.error(f"Error displaying interaction {idx + 1}: {str(e)}")
+            else:
+                st.info("No interactions yet")
+        except Exception as e:
+            st.error(f"Error in debug panel: {str(e)}")
+            st.info("Debug panel encountered an error. The application will continue to work normally.")
 
     with terminal_tab:
         st.title("💻 Terminal Output")
